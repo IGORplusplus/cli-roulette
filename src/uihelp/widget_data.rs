@@ -45,7 +45,7 @@ impl WidgetState {
         }
     }
 
-    pub fn change_focus(&mut self) {
+    pub fn toggle_focus(&mut self) {
         self.focus = !self.focus;
     }
 }
@@ -57,6 +57,7 @@ pub enum WidgetKind {
     Inventory,
     Player,
     Shotgun,
+    Confirmation,
 }
 
 #[derive(Debug)]
@@ -67,6 +68,9 @@ pub struct WidgetData{
     inventory: WidgetState,
     player: WidgetState,
     shotgun: WidgetState,
+    
+    confirmation: WidgetState,
+
     current_focus: Option<WidgetKind>,
 
     //render last in list first
@@ -81,6 +85,8 @@ impl WidgetData {
             inventory: WidgetState::new_blank(),
             player: WidgetState::new_blank(),
             shotgun: WidgetState::new_content(SHOTGUN_ART),
+
+            confirmation: WidgetState::new_blank(),
             current_focus: None,
 
             render_stack: Vec::new(),
@@ -94,6 +100,7 @@ impl WidgetData {
             (WidgetKind::Inventory, &self.inventory),
             (WidgetKind::Player, &self.player),
             (WidgetKind::Shotgun, &self.shotgun),
+            (WidgetKind::Confirmation, &self.confirmation),
         ]
             .into_iter()
     }
@@ -114,6 +121,17 @@ impl WidgetData {
         ]
     }
 
+    fn get(&self, kind: WidgetKind) -> &WidgetState {
+        match kind {
+            WidgetKind::Log => &self.log,
+            WidgetKind::Data => &self.data,
+            WidgetKind::Inventory => &self.inventory,
+            WidgetKind::Player => &self.player,
+            WidgetKind::Shotgun => &self.shotgun,
+            WidgetKind::Confirmation => &self.confirmation,
+        }
+    }
+
     fn get_mut(&mut self, kind: WidgetKind) -> &mut WidgetState {
         match kind {
             WidgetKind::Log => &mut self.log,
@@ -121,6 +139,7 @@ impl WidgetData {
             WidgetKind::Inventory => &mut self.inventory,
             WidgetKind::Player => &mut self.player,
             WidgetKind::Shotgun => &mut self.shotgun,
+            WidgetKind::Confirmation => &mut self.confirmation,
         }
     }
 
@@ -148,7 +167,6 @@ impl WidgetData {
         for _ in 0..order.len() {
             let kind = order[next_idx];
 
-            // ⛔ skip Shotgun if Log is displayed
             if log_displayed && kind == WidgetKind::Shotgun {
                 next_idx = (next_idx + 1) % order.len();
                 continue;
@@ -191,16 +209,6 @@ impl WidgetData {
         }
     }
 
-    fn get(&self, kind: WidgetKind) -> &WidgetState {
-        match kind {
-            WidgetKind::Log => &self.log,
-            WidgetKind::Data => &self.data,
-            WidgetKind::Inventory => &self.inventory,
-            WidgetKind::Player => &self.player,
-            WidgetKind::Shotgun => &self.shotgun,
-        }
-    }
-
     pub fn is_displayed(&self, kind: WidgetKind) -> bool{
         let widget_state = match kind {
             WidgetKind::Log => &self.log,
@@ -208,19 +216,13 @@ impl WidgetData {
             WidgetKind::Inventory => &self.inventory,
             WidgetKind::Player => &self.player,
             WidgetKind::Shotgun => &self.shotgun,
+            WidgetKind::Confirmation => &self.confirmation,
         };
         widget_state.display
     }
 
     pub fn is_focused(&self, kind: WidgetKind) -> bool{
-        let widget_state = match kind {
-            WidgetKind::Log => &self.log,
-            WidgetKind::Data => &self.data,
-            WidgetKind::Inventory => &self.inventory,
-            WidgetKind::Player => &self.player,
-            WidgetKind::Shotgun => &self.shotgun,
-        };
-        widget_state.focus
+        self.get(kind).focus
     }
 
     pub fn toggle_focus(&mut self, kind: WidgetKind) {
@@ -230,6 +232,7 @@ impl WidgetData {
             WidgetKind::Inventory => self.inventory.focus = !self.inventory.focus,
             WidgetKind::Player => self.player.focus = !self.player.focus,
             WidgetKind::Shotgun => self.shotgun.focus = !self.shotgun.focus,
+            WidgetKind::Confirmation => self.confirmation.focus = !self.confirmation.focus,
         }
 
         if self.current_focus == Some(kind) {
@@ -247,6 +250,7 @@ impl WidgetData {
             WidgetKind::Inventory => &self.inventory,
             WidgetKind::Player => &self.player,
             WidgetKind::Shotgun => &self.shotgun,
+            WidgetKind::Confirmation => &self.confirmation,
         }
     }
 
@@ -265,6 +269,7 @@ impl WidgetData {
             WidgetKind::Inventory => &mut self.inventory,
             WidgetKind::Player => &mut self.player,
             WidgetKind::Shotgun => &mut self.shotgun,
+            WidgetKind::Confirmation => &mut self.confirmation,
         };
         widget_to_modify.display = display_b;
         widget_to_modify.focus = focus_b;
@@ -273,20 +278,18 @@ impl WidgetData {
         }
     }
 
-    pub fn change_focus(&mut self, next: bool) {
+    //TODO: edit this function so that it works correctly with edge cases
+    pub fn remove_focus(&mut self) {
         self.log.focus = false;
         self.data.focus = false;
         self.inventory.focus = false;
         self.player.focus = false;
         self.shotgun.focus = false;
+        self.confirmation.focus = false;
     }
 
     pub fn kind_focus(&mut self, kind: &WidgetKind){
-        self.log.focus = false;
-        self.data.focus = false;
-        self.inventory.focus = false;
-        self.player.focus = false;
-        self.shotgun.focus = false;
+        self.remove_focus();
 
         match kind {
             WidgetKind::Log => self.log.focus = true,
@@ -294,6 +297,7 @@ impl WidgetData {
             WidgetKind::Inventory => self.inventory.focus = true,
             WidgetKind::Player => self.player.focus = true,
             WidgetKind::Shotgun => self.shotgun.focus = true,
+            WidgetKind::Confirmation => self.confirmation.focus = true,
         }
     }
 
@@ -304,6 +308,7 @@ impl WidgetData {
             WidgetKind::Inventory => self.inventory.color,
             WidgetKind::Shotgun => self.shotgun.color,
             WidgetKind::Player => self.player.color,
+            WidgetKind::Confirmation => self.confirmation.color,
         }
     }
 }

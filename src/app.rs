@@ -22,6 +22,7 @@ use crate::components::match_data::MatchData;
 use crate::uihelp::widget_data::{WidgetData, WidgetKind};
 use crate::event::{AppEvent, Event, EventHandler};
 use crate::ui;
+use crate::uihelp::logger::Logger;
 
 /// Application.
 #[derive(Debug)]
@@ -36,6 +37,8 @@ pub struct App {
     pub match_data: MatchData,
     ///holds the information of the widgets
     pub widget_data: WidgetData,
+    /// logger will replace log, and it will automatically size to the correct screen size
+    pub logger: Logger,
     /// log for popup texts
     pub log: VecDeque<String>,
     ///Where is the log scrolled to
@@ -49,6 +52,7 @@ impl Default for App {
             events: EventHandler::new(),
             data: Data::new(),
             match_data: MatchData::new(),
+            logger: Logger::new(),
             log: VecDeque::new(),
             log_scroll: 0,
             widget_data: WidgetData::new(),
@@ -78,7 +82,15 @@ impl App {
         crossterm::execute!(std::io::stdout(), EnableMouseCapture)?;
 
         while self.running {
-            terminal.draw(|frame| self.render_ui(frame))?;
+            terminal.draw(|frame| {
+
+                //changing logger's capacity
+                let area = frame.area();
+                let max_log_lines = ( area.height as f32 / 0.75 ) as usize;
+                self.logger.set_max_lines(max_log_lines);
+
+                self.render_ui(frame)})?;
+
             match self.events.next().await? {
                 Event::Tick => self.tick(),
                 Event::Crossterm(event) => match event {
@@ -94,6 +106,13 @@ impl App {
                     AppEvent::Shoot => {
                         if let Some(msg) = self.data.shotgun.shoot() {
                             self.send_log(Some(msg));
+                            if !self.data.shotgun.is_empty() {
+                                //bring up the confirmation screen
+                                self.widget_data.set_widget(WidgetKind::Confirmation, true, true);
+                            } else {
+                                //bring up the info screen
+
+                            }
                         }
                     },
                     AppEvent::ShowData => {

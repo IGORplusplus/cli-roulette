@@ -53,6 +53,10 @@ impl Shotgun {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.shells.borrow().is_empty()
+    }
+
     pub fn load(&self,all_shells: Vec<Shell>, weights: Vec<usize>, num_shells: usize) {
         let mut rng = thread_rng();
         let mut shells = self.shells.borrow_mut();
@@ -87,7 +91,7 @@ impl Shotgun {
 
         let weights = vec![
             10, //Live
-            14, //Blank
+            12, //Blank
             1, //Poison
             2, //BeanBag
             1, //Taser

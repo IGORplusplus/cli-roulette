@@ -7,10 +7,10 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub fn new(max_size: usize) -> Self {
+    pub fn new() -> Self {
         Logger {
             log: VecDeque::new(),
-            max_size,
+            max_size: 0,
         }
     }
 
@@ -23,12 +23,7 @@ impl Logger {
         }
     }
 
-    pub fn iter(&self) -> std::collections::vec_deque::Iter<'_, String>{
-        self.log.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> std::collections::vec_deque::IterMut<'_, String>{
-        self.log.iter_mut()
+    pub fn set_max_lines(&mut self, line_number: usize) {
+        self.max_size = line_number;
     }
 }    
-

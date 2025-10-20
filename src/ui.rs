@@ -129,7 +129,7 @@ fn render_data_popup(app: &App, frame: &mut Frame) {
     };
 
     let popup_content = format!(
-        "Data: {:?} Counter: {}", app.data, app.counter,
+        "Data: {:?} Counter: {}", app.data, app.match_data.round_count,
     );
 
     let mut data_popup = Paragraph::new(popup_content)
@@ -233,6 +233,8 @@ fn render_shotgun_popup(app: &App, frame: &mut Frame) {
     frame.render_widget(shotgun_popup, area);
 }
 
+
+//want to make a popup to confirm things
 fn render_confirm_popup(app: &App, frame: &mut Frame) {
     //three rects/ one big one and two small ones
     let frame_area = frame.area();
