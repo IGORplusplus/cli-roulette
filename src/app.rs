@@ -1,12 +1,7 @@
 //std library
 use std::collections::VecDeque;
 
-use crate::components::enums::ReloadAmount;
-use crate::uihelp::widget_data::{WidgetData, WidgetKind};
-use crate::ui;
-
-use crate::event::{AppEvent, Event, EventHandler};
-use crossterm::event::EnableMouseCapture;
+//ratatui
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     /* style::{ Color, Style, Stylize },
@@ -18,21 +13,27 @@ use ratatui::{
 
 //crossterm
 use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
+use crossterm::event::EnableMouseCapture;
 
 //user made ones
 use crate::data::Data;
+use crate::components::enums::ReloadAmount;
+use crate::components::match_data::MatchData;
+use crate::uihelp::widget_data::{WidgetData, WidgetKind};
+use crate::event::{AppEvent, Event, EventHandler};
+use crate::ui;
 
 /// Application.
 #[derive(Debug)]
 pub struct App {
     /// Is the application running?
     pub running: bool,
-    /// Counter.
-    pub counter: u8,
     /// Event handler.
     pub events: EventHandler,
     /// game data
     pub data: Data,
+    /// match data
+    pub match_data: MatchData,
     ///holds the information of the widgets
     pub widget_data: WidgetData,
     /// log for popup texts
@@ -45,9 +46,9 @@ impl Default for App {
     fn default() -> Self {
         Self {
             running: true,
-            counter: 0,
             events: EventHandler::new(),
             data: Data::new(),
+            match_data: MatchData::new(),
             log: VecDeque::new(),
             log_scroll: 0,
             widget_data: WidgetData::new(),
@@ -199,7 +200,7 @@ impl App {
             KeyCode::Tab if key_event.modifiers == KeyModifiers::CONTROL => self.events.send(AppEvent::ChangeFocusBack),
             KeyCode::Tab => self.events.send(AppEvent::ChangeFocus),
             KeyCode::Char('r' | 'R') => {
-                match self.data.round_count {
+                match self.match_data.round_count {
                     1 => self.events.send(AppEvent::Reload(ReloadAmount::One)),
                     2 => self.events.send(AppEvent::Reload(ReloadAmount::Two)),
                     3 => self.events.send(AppEvent::Reload(ReloadAmount::Three)),

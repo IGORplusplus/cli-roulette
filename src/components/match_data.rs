@@ -1,14 +1,15 @@
 #[derive(Debug, Default, Clone)]
 pub struct MatchData {
-    count: i8,
+    //try my best not always operate on these values directly
+    pub round_count: usize,
     //represents the players
-    turn: Option<i8>,
+    pub turn: Option<usize>,
 }
 
 impl MatchData {
     pub fn new() -> Self {
         MatchData {
-            count: 0,
+            round_count: 0,
             turn: None,
         }
     }
