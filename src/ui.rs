@@ -129,7 +129,7 @@ fn render_data_popup(app: &App, frame: &mut Frame) {
     };
 
     let popup_content = format!(
-        "Data: {:?} Counter: {}", app.data, app.match_data.round_count,
+        "Data: {:?} Counter: {}\nWindow: {:?}", app.data, app.match_data.round_count, app.logger.get_window(),
     );
 
     let mut data_popup = Paragraph::new(popup_content)
@@ -160,11 +160,11 @@ fn render_log_popup(app: &App, frame: &mut Frame) {
         height,
     };
 
-    let log_content = app.log.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n");
+    let log_content = app.logger.get_window().iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n");
     let mut log_popup = Paragraph::new(log_content)
         .block(Block::default().title("Message Log - use j k to navigate").borders(Borders::ALL))
         .wrap(Wrap {trim: true})
-        .scroll((app.log_scroll, 0));
+        .scroll((( app.logger.log_scroll as u16), 0));
     if app.widget_data.is_focused(WidgetKind::Log) {
         log_popup = log_popup.set_style(Style::default().fg(Color::LightRed));
     }
@@ -176,11 +176,11 @@ fn render_log_popup(app: &App, frame: &mut Frame) {
 
 fn render_inventory_popup(app: &App, frame: &mut Frame, chunks: &[Rect]) {
     let area = chunks[2];
-    let log_content = app.log.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n");
+    let log_content = app.logger.log.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n");
     let mut log_popup = Paragraph::new(log_content)
         .block(Block::default().title("Message Log").borders(Borders::ALL))
         .wrap(Wrap {trim: true})
-        .scroll((app.log_scroll, 0));
+        .scroll(((app.logger.log_scroll as u16), 0));
     if app.widget_data.is_focused(WidgetKind::Inventory) {
         log_popup = log_popup.set_style(Style::default().fg(Color::LightRed))
     }

@@ -81,7 +81,7 @@ impl WidgetData {
     pub fn new() -> WidgetData {
         WidgetData {
             log: WidgetState::new_blank(),
-            data: WidgetState::new_color(Some(Color::Green)),
+            data: WidgetState::new_color(Some(Color::White)),
             inventory: WidgetState::new_blank(),
             player: WidgetState::new_blank(),
             shotgun: WidgetState::new_content(SHOTGUN_ART),

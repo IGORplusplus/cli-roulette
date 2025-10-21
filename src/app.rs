@@ -39,10 +39,6 @@ pub struct App {
     pub widget_data: WidgetData,
     /// logger will replace log, and it will automatically size to the correct screen size
     pub logger: Logger,
-    /// log for popup texts
-    pub log: VecDeque<String>,
-    ///Where is the log scrolled to
-    pub log_scroll: u16,
 }
 
 impl Default for App {
@@ -52,10 +48,8 @@ impl Default for App {
             events: EventHandler::new(),
             data: Data::new(),
             match_data: MatchData::new(),
-            logger: Logger::new(),
-            log: VecDeque::new(),
-            log_scroll: 0,
             widget_data: WidgetData::new(),
+            logger: Logger::new(),
         }
     }
 }
@@ -69,10 +63,10 @@ impl App {
     pub fn send_log(&mut self, message: Option<String>) {
         if let Some(msg) = message {
             let max_size: usize = 1000;
-            if self.log.len() >= max_size {
-                self.log.pop_front();
+            if self.logger.log.len() >= max_size {
+                self.logger.log.pop_front();
             }
-            self.log.push_back(msg)
+            self.logger.log.push_back(msg)
         }
     }
 
@@ -86,8 +80,9 @@ impl App {
 
                 //changing logger's capacity
                 let area = frame.area();
-                let max_log_lines = ( area.height as f32 / 0.75 ) as usize;
-                self.logger.set_max_lines(max_log_lines);
+                let max_window_lines = ( area.height as f32 / 1.45 ) as usize;
+                self.logger.set_window_size(max_window_lines);
+                self.logger.update_window();
 
                 self.render_ui(frame)})?;
 
@@ -105,7 +100,7 @@ impl App {
                     },
                     AppEvent::Shoot => {
                         if let Some(msg) = self.data.shotgun.shoot() {
-                            self.send_log(Some(msg));
+                            self.logger.send_log(Some(msg));
                             if !self.data.shotgun.is_empty() {
                                 //bring up the confirmation screen
                                 self.widget_data.set_widget(WidgetKind::Confirmation, true, true);
@@ -134,6 +129,7 @@ impl App {
                             self.widget_data.render_stack.push(WidgetKind::Data)
                         }
                     },
+
                     AppEvent::ShowLog => {
                         if self.widget_data.is_displayed(WidgetKind::Log) {
                             self.widget_data.set_widget(WidgetKind::Log, false, false);
@@ -148,6 +144,7 @@ impl App {
                             self.widget_data.render_stack.push(WidgetKind::Log)
                         }
                     },
+
                     AppEvent::ShowInventory => {
                         if self.widget_data.is_displayed(WidgetKind::Inventory) {
                             self.widget_data.set_widget(WidgetKind::Inventory, false, false);
@@ -180,12 +177,12 @@ impl App {
                         self.widget_data.toggle_focus(WidgetKind::Shotgun);
                     },
                     AppEvent::ScrollUp => {
-                        if self.log_scroll > 0 {
-                            self.log_scroll -= 1;
-                        }
+                        /* if self.logger.log_scroll > 0 {
+                            self.logger.scroll_up();
+                        } */
                     },
                     AppEvent::ScrollDown => {
-                        self.log_scroll += 1;
+/*                         self.logger.scroll_down(); */
                     },
                     AppEvent::ChangeFocus => {
                         self.widget_data.focus_next();
@@ -194,7 +191,7 @@ impl App {
                         self.widget_data.focus_prev();
                     },
                     _ => {
-                        self.send_log(Some(String::from("Failure to catch event")));
+                        self.logger.send_log(Some(String::from("Failure to catch event")));
                     },
                 },
             }
@@ -238,16 +235,16 @@ impl App {
     pub fn handle_mouse_events(&mut self, mouse_event: MouseEvent) -> color_eyre::Result<()> {
         match mouse_event.kind {
             MouseEventKind::ScrollUp => {
-                self.send_log(Some("scrolling up".to_string()));
+                self.logger.send_log(Some("scrolling up".to_string()));
                 self.events.send(AppEvent::ScrollUp)
             },
             MouseEventKind::Drag(mouse_button) => {
                 match mouse_button {
                     MouseButton::Left => {
-                        self.send_log(Some("left dragging".to_string()));
+                        self.logger.send_log(Some("left dragging".to_string()));
                     },
                     _ => {
-                        self.send_log(Some("some other dragging".to_string()));
+                        self.logger.send_log(Some("some other dragging".to_string()));
                     },
                 }
             },
@@ -259,7 +256,7 @@ impl App {
 
     fn render_ui(&mut self, frame: &mut Frame){
         let log: Option<String> = ui::render_ui(self, frame);
-        self.send_log(log);
+        self.logger.send_log(log);
     }
 
     /// Handles the tick event of the terminal.
