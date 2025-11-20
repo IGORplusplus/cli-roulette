@@ -13,4 +13,8 @@ impl MatchData {
             turn: None,
         }
     }
+
+    pub fn increment_round(&mut self) {
+        self.round_count += 1;
+    }
 }

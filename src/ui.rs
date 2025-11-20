@@ -7,7 +7,7 @@ use ratatui::{
 //add svg crate
 /* use svg::{Tree, NodeKind}; */
 
-use crate::uihelp::widget_data::{WidgetKind, WidgetData};
+use crate::ui_components::widget_data::{WidgetKind, WidgetData};
 use crate::app::{ App };
 
 const PLAYER_ART: &str = r#"

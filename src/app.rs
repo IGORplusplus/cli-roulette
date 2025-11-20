@@ -19,10 +19,10 @@ use crossterm::event::EnableMouseCapture;
 use crate::data::Data;
 use crate::components::enums::ReloadAmount;
 use crate::components::match_data::MatchData;
-use crate::uihelp::widget_data::{WidgetData, WidgetKind};
+use crate::ui_components::widget_data::{WidgetData, WidgetKind};
 use crate::event::{AppEvent, Event, EventHandler};
 use crate::ui;
-use crate::uihelp::logger::Logger;
+use crate::ui_components::logger::Logger;
 
 /// Application.
 #[derive(Debug)]

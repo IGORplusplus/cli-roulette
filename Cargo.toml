@@ -14,3 +14,4 @@ tokio = { version = "1.40.0", features = ["full"] }
 color-eyre = "0.6.3"
 rand = "0.8"
 usvg = "0.30"
+hex_color = "3"

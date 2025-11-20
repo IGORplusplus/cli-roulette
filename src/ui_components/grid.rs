@@ -1,3 +1,5 @@
+//grid will be used for the inventory
+
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
